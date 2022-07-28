@@ -33,7 +33,11 @@ const {
 // < 16
 
 function exponencial(exp) {
-
+   this.exp = exp
+   return function(base){
+    this.base = base;
+     return  base ** exp
+   }
 }
 
 // ----- Recursión -----
@@ -43,7 +47,7 @@ function exponencial(exp) {
 // La funcion debe retornar un string de los movimientos Norte(N), Sur(S), Este(E), Oeste(O)
 // que se deben realizar, para llegar al destino de un laberinto dado.
 //
-// Ejemplo: dado el siguiente laberinto:
+// // Ejemplo: dado el siguiente laberinto:
 // let laberintoExample = { // direccion = ""
 //     N: 'pared',
 //     S: { // direccion = "S"
@@ -65,15 +69,27 @@ function exponencial(exp) {
 //     E: 'pared',
 //     O: 'pared'
 // }
+
 // El retorno de la funcion 'direcciones' debe ser 'SEN', ya que el destino se encuentra
 // haciendo los movimientos SUR->ESTE->NORTE
 // Aclaraciones: el segundo parametro que recibe la funcion ('direccion') puede ser pasado vacio (null)
+function direcciones(laberinto){
+    // if(laberinto == "" || laberinto == null || laberinto == undefined)return "";//primera condicion
 
-function direcciones(laberinto) {
+    for(let key in laberinto){//recorrer el objeto;
 
+   if(laberinto[key]=="destino")return key;//condicion  de corte, 
+
+   else if(typeof laberinto[key] =="object"){//en caso de que laberinto[valor] sea un objeto
+            //  entra aqui 
+            if (direcciones(laberinto[key]) !== ""){//si la invocacion de la recursividad en distinto de un string vacio; 
+
+                return key+direcciones(laberinto[key]);
+          }
+        } 
+    }
+    return "";
 }
-
-
 // EJERCICIO 3
 // Crea la funcion 'deepEqualArrays':
 // Dado que las comparaciones en javascript aveces son un problema como con el siguiente ejemplo:
@@ -88,11 +104,12 @@ function direcciones(laberinto) {
 // deepEqualArrays([0,1,[[0,1,2],1,2]], [0,1,[[0,1,2],1,2]]) => true
 
 function deepEqualArrays(arr1, arr2) {
-
+   if (JSON.stringify(arr1) === JSON.stringify(arr2))return true;
+ return false 
 }
 
 
-
+// console.log(deepEqualArrays([0,1,[[0,1,2],1,2]], [0,1,[[0,1,2],1,2]]));
 // ----- LinkedList -----
 
 // Deben completar la siguiente implementacion 'OrderedLinkedList'(OLL)
@@ -138,8 +155,24 @@ OrderedLinkedList.prototype.print = function(){
 // > LL.print()
 // < 'head --> 5 --> 3 --> 1 --> null'
 //               4
-OrderedLinkedList.prototype.add = function(val){
-    
+OrderedLinkedList.prototype.add = function(valor){
+      const nodo = new Node(valor);
+      let refe = this.head;
+     if(refe == null){
+        this.head = nodo;
+    } 
+     else if(refe.value < valor){
+         this.head = nodo;
+         nodo.next = refe
+     }else{
+         while(refe.next !== null && refe.next.value > valor){
+             refe = refe.next;
+         }
+        nodo.next = refe.next;
+        refe.next = nodo
+        
+     }
+      
 }
 
 
@@ -158,11 +191,55 @@ OrderedLinkedList.prototype.add = function(val){
 // > LL.removeHigher()
 // < null
 
-OrderedLinkedList.prototype.removeHigher = function(){
-    
-}
+OrderedLinkedList.prototype.removeHigher = function(){ 
+    let refe = this.head;
+    let previo = refe;
+    let mayor = 0;
 
+    if(this.head == null)return null;
+    if(this.head.next == null){
+       previo = this.head.value
+        this.head = null;
+        return previo  
+    }
 
+    else if(refe.value > refe.next.value){
+        this.head = refe.next 
+        refe.next = null;
+         return previo.value;
+    } else{
+           if(!refe){
+            while(refe !== null ){
+                       if (refe.value > mayor){
+                          previo = refe;
+                          mayor = refe.value;
+                       }
+                        refe = refe.next;
+                     }
+                    previo.next = previo.next.next;
+                    previo = null;           
+        }else{
+            while (refe.value < refe.next.value) {
+                if (refe.value > mayor){
+                  previo = refe;
+                  mayor = refe.next;
+                }
+                previo = refe;
+                refe = refe.next
+              }
+              refe.next = refe.next
+              previo.next = refe.next
+              refe = null;
+            }
+             
+             return mayor.value
+        }
+     }
+
+ 
+
+// console.log(ll);
+// console.log(ll);
 // EJERCICIO 6
 // Crea el metodo 'removeLower' que deve devolver el valor mas bajo de la linked list 
 // removiendo su nodo corresponidente:
@@ -179,10 +256,39 @@ OrderedLinkedList.prototype.removeHigher = function(){
 // < null
 
 OrderedLinkedList.prototype.removeLower = function(){
+        let refe = this.head;
+        let previo = refe;
+        let menor = 0;
     
-}
+        if(this.head == null)return null;
+        
+        if(this.head.next == null){
+           previo = this.head.value
+            this.head = null;
+            return previo  
 
-
+        }
+        else if(refe.value < refe.next.value && refe.value < refe.next.next.value){
+              previo = this.head.value;   
+            this.head = this.head.next;
+            return previo
+        }
+        else{    
+            if (refe.value > refe.next.value) {
+                 while (refe.next !== null) {
+                        if (refe.next.value < refe.value) {
+                            previo = refe;
+                           menor = refe.next;
+                         
+                        }
+                        refe = refe.next;
+                 }
+                  previo.next = previo.next.next;
+                  menor.next = null;
+                 return menor.value;
+              }
+           }
+    }
 
 // ----- QUEUE -----
 
@@ -212,10 +318,21 @@ OrderedLinkedList.prototype.removeLower = function(){
 // < ["2-1", "1-1", "1-2", "2-2"];
 
 function multiCallbacks(cbs1, cbs2){
-    
-}
+     let array = [];
 
-
+    let longitud = cbs1.length
+    for (let i = 0; i < longitud; i++) {
+        if (cbs1[i].time > cbs2[i].time) {
+            array.push(cbs2[i].cb());
+            array.push(cbs1[i].cb())
+      }else{
+        array.push(cbs1[i].cb())
+        array.push(cbs2[i].cb());
+      }
+       
+    }
+     return array
+ }
 
 // ----- BST -----
 
@@ -229,13 +346,34 @@ function multiCallbacks(cbs1, cbs2){
 //  / \
 // 5   9
 // resultado:[5,8,9,32,64]
-
+let array = [];
 BinarySearchTree.prototype.toArray = function() {
     
+        array.push(this.value)
+
+    if(this.left){
+        this.left.toArray();
+    }
+    if(this.right){
+        this.right.toArray();
+    }
+    
+    return array.filter((item, index) => array.indexOf(item) === index).sort((a, b)=> a - b);
+
 }
 
 
-
+// let tree = new BinarySearchTree(32);
+// tree.insert(5);
+// tree.insert(8);
+// tree.insert(9);
+// tree.insert(64);
+// tree.toArray();
+// console.log(tree);
+// console.log(tree.toArray());
+// tree.insert(45);
+// tree.insert(70);
+// tree.insert(30)
 // ----- Algoritmos -----
 
 // Ejercicio 9
@@ -250,18 +388,47 @@ BinarySearchTree.prototype.toArray = function() {
 // informarse sobre algoritmos, leerlos de un pseudocodigo e implemnterlos alcanzara
 
 function primalityTest(n) {
-    
+     if( n == 2 || n == 3) return true; 
+
+     if( n <= 1 || n % 2 == 0 || n % 3 == 0 ) return false;
+     
+     for (let i = 5; i * i <= n ; i+=6) {
+        if(n % i  == 0 || n % (i + 2) == 0) return false
+     }
+     
+     return true;
+
 }
-
-
 // EJERCICIO 10
 // Implementa el algoritmo conocido como 'quickSort', que dado un arreglo de elemntos
 // retorn el mismo ordenado de 'mayor a menor!'
 // https://en.wikipedia.org/wiki/Quicksort
 
 function quickSort(array) {
+  
+     if(array.length < 2) return array;
+   
+    const pivote = array[Math.floor(Math.random() * array.length)];
+    let mayores = [];
+    let mid = [];
+    let menores = [];
     
+     for (let valor of array) {
+          if(valor > pivote){
+
+            mayores.push(valor);
+          }
+          else if (valor < pivote){
+             menores.push(valor)
+          }
+          else{
+            mid.push(valor)
+          }
+     }
+
+     return  quickSort(mayores).concat(mid, quickSort(menores));
 }
+
 // QuickSort ya lo conocen solo que este 
 // ordena de mayor a menor
 // para esto hay que unir como right+mid+left o cambiar el 
@@ -283,7 +450,14 @@ function quickSort(array) {
 // < 32859
 
 function reverse(num){
-    
+    let invertido = 0;
+
+    while (num != 0) {
+          invertido = 10 * invertido + num % 10;
+          num = Math.floor(num / 10);
+    }
+
+    return invertido;
 }
 // la grandiosa resolucion de Wilson!!!
 // declaran una variable donde 
